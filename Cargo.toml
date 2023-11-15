@@ -1,0 +1,17 @@
+[package]
+name = "splatink"
+version = "1.1.2"
+license = "© 2023 - keifufu"
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+winres = "0.1"
+cc = "1.0"
+
+[dependencies]
+chrono = { version = "0.4.28", features = ["serde"] }
+reqwest = { version = "0.11.20", features = ["blocking"] }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.105"

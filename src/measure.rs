@@ -29,7 +29,7 @@ enum JsonSource<'a> {
 impl Measure {
     pub fn new(api: RmApi) -> Measure {
         let RESOURCE_DIR = api.read_path("DONTNAMESOMETHINGTHIS", "@Resources");
-        let SKIN_PATH = api.read_path("DONTNAMESOMETHINGTHIS", "SplatinkRotationDisplay.ini");
+        let SKIN_PATH = api.read_path("DONTNAMESOMETHINGTHIS", "Splatoon3RotationDisplay.ini");
         Measure {
             rm_api: api,
             measure_type: SplatinkType::Core("RegSche".to_string()),

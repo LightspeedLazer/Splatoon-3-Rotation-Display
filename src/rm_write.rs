@@ -5,7 +5,7 @@ use self::serde::{Deserialize, Serialize};
 #[allow(unused)]
 pub fn write_to_skin(skin_path: &str, contents: Vec<RmObject>) -> Result<(), std::io::Error>{
     std::fs::write(skin_path, {
-        let mut ret = String::from("[Rainmeter]\nUpdate=1000\nAccurateText=1\nContextTitle=Refresh File\nContextAction=[!CommandMeasure \"SplatinkCore\" \"RefreshFile\"]\nContextTitle2=Repull Data\nContextAction2=[!CommandMeasure \"SplatinkCore\" \"RepullData\"]\n[Metadata]\nName=Splatoon 3 Rotation Display\nAuthor=gamingtime\nInformation=Displays the future Splatoon 3 schedules along with upcoming and recent Splatfest data\nVersion=1.1.3\nLicense=Creative Commons Attribution - Non - Commercial - Share Alike 3.0\n");
+        let mut ret = String::from("[Rainmeter]\nUpdate=1000\nAccurateText=1\nContextTitle=Refresh File\nContextAction=[!CommandMeasure \"SplatinkCore\" \"RefreshFile\"]\nContextTitle2=Repull Data\nContextAction2=[!CommandMeasure \"SplatinkCore\" \"RepullData\"]\n[Metadata]\nName=Splatoon 3 Rotation Display\nAuthor=gamingtime\nInformation=Uses splatoon3.ink to display the future Splatoon 3 schedules along with upcoming and recent Splatfest data\nVersion=1.1.4\nLicense=Creative Commons Attribution - Non - Commercial - Share Alike 3.0\n");
         for obj in contents {
             ret += &format!("{obj}\n");
         }

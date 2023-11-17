@@ -22,7 +22,7 @@ Uses [splatoon3.ink](https://splatoon3.ink/) to display the future Splatoon 3 sc
 ## Features
 * Shows all the schedule data you'd normally get from the Nintendo Online app and more
 * Shows the upcoming splatfest soon after it is announced
-* Shows the tricolor data as soon as the splatfest starts
+* Shows the tricolor data 24 hours before the splatfest starts
 * Shows the splatfest results as soon as they are posted, team in the top left is the winner
 * Big Runs and Eggstra Work shifts are indicated with a golden background
 * Time boxes have a red bar that indicates progress through the rotation

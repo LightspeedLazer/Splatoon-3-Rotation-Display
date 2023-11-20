@@ -18,6 +18,7 @@ Uses [splatoon3.ink](https://splatoon3.ink/) to display the future Splatoon 3 sc
   * Stage: Shows the name of the stage
   * Weapon: Shows the name of the weapon
   * King Salmonid: Shows the name of the King Salmonid
+  * Challenge Name/Description: Shows full details on the challenge
 
 ## Features
 * Shows all the schedule data you'd normally get from the Nintendo Online app and more
@@ -36,4 +37,4 @@ Uses [splatoon3.ink](https://splatoon3.ink/) to display the future Splatoon 3 sc
 
 ![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/c9e2dfc8-e93c-40f3-8b4f-b7fa0b91ee79)
 ![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/ed141830-ff6b-4404-9eec-0a1b027cbb05)
-![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/d9c517e4-0eaa-421c-a28f-d233099b3a87)
+![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/173b183f-2cc9-431b-b003-85e668c8ad33)

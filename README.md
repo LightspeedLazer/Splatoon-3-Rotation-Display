@@ -11,7 +11,7 @@ Uses [splatoon3.ink](https://splatoon3.ink/) to display the future Splatoon 3 sc
 * Clicking the arrow buttons or scrolling will change the displayed schedule to the next or previous mode
 * Right click to bring up the Rainmeter context menu. There are two menu options under "Custom skin actions"
   * Refresh File: Refreshes the Rainmeter skin (Note: Refreshing the skin through the default Rainmeter "Refresh Skin" doesn't really do anything)
-  * Repull Data: Pulls schedule data from [splatoon3.ink](https://splatoon3.ink/) and refreshes the file
+  * Repull Data: Pulls schedule data from [splatoon3.ink](https://splatoon3.ink/) and refreshes the file. Useful for when splatfest data isn't uploaded at the same time as the schedule data
 * Hover over anything in the schedule area to see more info
   * Day/Time: Shows the time in MM/DD HHam/pm format
   * Mode: Shows the name of the mode
@@ -36,3 +36,4 @@ Uses [splatoon3.ink](https://splatoon3.ink/) to display the future Splatoon 3 sc
 
 ![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/c9e2dfc8-e93c-40f3-8b4f-b7fa0b91ee79)
 ![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/ed141830-ff6b-4404-9eec-0a1b027cbb05)
+![image](https://github.com/LightspeedLazer/Splatoon-3-Rotation-Display/assets/45500440/d9c517e4-0eaa-421c-a28f-d233099b3a87)

@@ -415,8 +415,8 @@ impl RmStructure {
                                 )
                             },
                             title: ele.leagueMatchSetting.leagueMatchEvent.name.clone(),
-                            desc: ele.leagueMatchSetting.leagueMatchEvent.desc.clone(),
-                            details: ele.leagueMatchSetting.leagueMatchEvent.regulation.clone(),
+                            desc: ele.leagueMatchSetting.leagueMatchEvent.desc.replace("<br />", " ").replace("・", " *"),
+                            details: ele.leagueMatchSetting.leagueMatchEvent.regulation.replace("<br />", " ").replace("・", " *"),
                         }
                     );
                 }

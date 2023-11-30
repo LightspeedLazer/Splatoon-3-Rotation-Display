@@ -1054,8 +1054,8 @@ impl ToRM for ChalEvent {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.size = (100,150).into();
-                        ret.solid_color = Some((50,50,50,255).into());
+                        ret.size = (200,150).into();
+                        ret.solid_color = Some((30,30,30,255).into());
                         ret
                     }
                 )
@@ -1067,7 +1067,8 @@ impl ToRM for ChalEvent {
                 for obj in ret.iter_mut() {
                     obj.prefix_name_mut(&format!("Time{i}"));
                     if let ObjectType::Meter(_, ref mut o) = obj.object_type {
-                        o.pos += (0,(75 - self.run_time.len() * 25 + 50 * i) as isize).into();
+                        let vert_height: usize = if self.run_time.len() > 3 {(self.run_time.len() as f64 / 2.0).ceil() as usize} else {self.run_time.len()};
+                        o.pos += (if self.run_time.len() > 3 {if i >= vert_height {100} else {0}} else {50},(75 - vert_height * 25 + 50 * (i % vert_height) + if i >= vert_height && self.run_time.len() % 2 == 1 {25} else {0}) as isize).into();
                     }
                 }
                 ret
@@ -1077,7 +1078,7 @@ impl ToRM for ChalEvent {
             let mut ret = self.vs_setting.to_rm();
             for obj in ret.iter_mut() {
                 if let ObjectType::Meter(_, ref mut o) = obj.object_type {
-                    o.pos += (100,0).into();
+                    o.pos += (200,0).into();
                 }
             }
             ret
@@ -1093,7 +1094,7 @@ impl ToRM for ChalEvent {
                 ),
                 {
                     let mut ret = MeterOptions::new();
-                    ret.pos = (225,75).into();
+                    ret.pos = (325,75).into();
                     ret.size = (250,50).into();
                     ret.solid_color = Some((40,40,40,255).into());
                     ret.tool_tip = Some(ToolTip::new(self.details.clone()));
@@ -1114,7 +1115,7 @@ impl ToRM for ChalEvent {
                 ),
                 {
                     let mut ret = MeterOptions::new();
-                    ret.pos = (225,125).into();
+                    ret.pos = (325,125).into();
                     ret.size = (250,50).into();
                     ret.solid_color = Some((40,40,40,255).into());
                     ret.tool_tip = Some(ToolTip::new(self.details.clone()));

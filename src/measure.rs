@@ -1,3 +1,5 @@
+extern crate chrono;
+use self::chrono::Duration;
 use rainmeter::api::RmApi;
 use crate::{schedule_data::RotationData, rm_write::{write_to_skin, ToRM, SplatinkType, TimeBarOptions, RmObject, ObjectType, MeasureType, PluginType, MeasureOptions}, splatfest_data::SplatfestData, rm_structure::{RmStructure, Download}};
 extern crate serde;
@@ -11,6 +13,8 @@ pub struct Measure {
     schedules: Option<RotationData>,
     pub RESOURCE_DIR: String,
     pub SKIN_PATH: String,
+    web_pull_cooldown: Duration,
+    web_pull_cooldown_set: u32,
 }
 
 const SCHEDULE_JSON_NAME: &str = "Schedules Json.json";
@@ -20,6 +24,7 @@ const SCHEDULE_JSON_SOURCE: JsonSource = JsonSource::Web;
 const SPLATFEST_JSON_SOURCE: JsonSource = JsonSource::Web;
 // const SPLATFEST_JSON_SOURCE: JsonSource = JsonSource::Storage("Splatfest Results");
 #[derive(PartialEq)]
+#[allow(unused)]
 enum JsonSource<'a> {
     Web,
     Storage(&'a str),
@@ -37,6 +42,8 @@ impl Measure {
             schedules: None,
             RESOURCE_DIR,
             SKIN_PATH,
+            web_pull_cooldown: Duration::seconds(0),
+            web_pull_cooldown_set: 2,
         }
     }
     pub fn dispose(&self) {}
@@ -137,8 +144,12 @@ impl Measure {
         if let Some(ref schedules) = self.schedules {
             match schedules.data.regularSchedules.nodes.first().ok_or("Local Regular Schedule Has No Elements".to_string())
                 .and_then(|event|{
-                    if SCHEDULE_JSON_SOURCE != JsonSource::Web || chrono::Local::now() > event.endTime + chrono::Duration::seconds(20) {
-                        self.pull_schedules()
+                    if SCHEDULE_JSON_SOURCE != JsonSource::Web || chrono::Local::now() > event.endTime {
+                        if self.web_pull_cooldown_set == 2 {self.rm_api.log(crate::rainmeter::api::LogType::Notice, "--------Schedules out of date--------");}
+                        if !self.web_pull_cooldown.is_zero() {
+                            Ok(Err(false))
+                        } else {
+                            self.pull_schedules()
                             .and_then(|json|
                                 Self::parse_json::<RotationData>(&json)
                             )
@@ -148,8 +159,8 @@ impl Measure {
                                         match source.data.regularSchedules.nodes.first().ok_or("Web Regular Schedule Has No Elements".to_string()) {
                                             Ok(event) => {
                                                 if chrono::Local::now() <= event.endTime {
-                                                    Ok(Some(source))
-                                                } else {Ok(None)}
+                                                    Ok(Ok(source))
+                                                } else {Ok(Err(true))}
                                             },
                                             Err(e) => {
                                                 Err(e)
@@ -158,20 +169,32 @@ impl Measure {
                                     },
                                     JsonSource::Storage(_) => {
                                         if &source != schedules {
-                                            Ok(Some(source))
-                                        } else {Ok(None)}
+                                            Ok(Ok(source))
+                                        } else {Ok(Err(false))}
                                     }
                                 }
                             })
-                    } else {Ok(None)}
+                        }
+                    } else {Ok(Err(false))}
                 }) {
-                    Ok(Some(replacement)) => {
-                        self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Schedules out of date");
+                    Ok(Ok(replacement)) => {
                         self.schedules = Some(replacement);
                         self.rewrite_file().map_err(|e| self.rm_api.log(crate::rainmeter::api::LogType::Error, e)).ok();
-                    },
-                    Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
-                    _ => {}
+                    }
+                    varible => {
+                        match varible {
+                            Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
+                            Ok(Err(true)) => {self.rm_api.log(crate::rainmeter::api::LogType::Warning, "Web schedule hasn't been updated yet".to_string());}
+                            _ => {}
+                        }
+                        if self.web_pull_cooldown.is_zero() {
+                            self.web_pull_cooldown = Duration::seconds(2_i64.pow(self.web_pull_cooldown_set));
+                            self.web_pull_cooldown_set = (self.web_pull_cooldown_set + 1).min(10);
+                            self.rm_api.log(crate::rainmeter::api::LogType::Notice, format!("Web requesting on cooldown for {:02}:{:02}", self.web_pull_cooldown.num_minutes(), self.web_pull_cooldown.num_seconds() % 60));
+                        } else {
+                            self.web_pull_cooldown = self.web_pull_cooldown - Duration::seconds(1);
+                        }
+                    }
                 }
         }
     }

@@ -138,7 +138,7 @@ impl Display for MeasureOptions {
         write!(f, "{ret}")
     }
 }
-
+#[allow(unused)]
 pub enum MeasureType {
     Plugin(PluginType),
     String(String),
@@ -387,6 +387,7 @@ impl Display for BarOptions {
         write!(f, "BarColor={}\nBarOrientation={}", self.bar_color, self.bar_orientation)
     }
 }
+#[allow(unused)]
 pub enum BarOrientation {
     Vertical,
     Horizontal,

@@ -183,15 +183,21 @@ impl Measure {
                     }
                     varible => {
                         match varible {
-                            Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
-                            Ok(Err(true)) => {self.rm_api.log(crate::rainmeter::api::LogType::Warning, "Web schedule hasn't been updated yet".to_string());}
-                            _ => {}
+                            Ok(Err(false)) => {}
+                            varible2 => {
+                                match varible2 {
+                                    Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
+                                    Ok(Err(true)) => {self.rm_api.log(crate::rainmeter::api::LogType::Warning, "Web schedule hasn't been updated yet".to_string());}
+                                    _ => {}
+                                }
+                                if self.web_pull_cooldown.is_zero() {
+                                    self.web_pull_cooldown = Duration::seconds(2_i64.pow(self.web_pull_cooldown_set));
+                                    self.web_pull_cooldown_set = (self.web_pull_cooldown_set + 1).min(10);
+                                    self.rm_api.log(crate::rainmeter::api::LogType::Notice, format!("Web requesting on cooldown for {:02}:{:02}", self.web_pull_cooldown.num_minutes(), self.web_pull_cooldown.num_seconds() % 60));
+                                }
+                            }
                         }
-                        if self.web_pull_cooldown.is_zero() {
-                            self.web_pull_cooldown = Duration::seconds(2_i64.pow(self.web_pull_cooldown_set));
-                            self.web_pull_cooldown_set = (self.web_pull_cooldown_set + 1).min(10);
-                            self.rm_api.log(crate::rainmeter::api::LogType::Notice, format!("Web requesting on cooldown for {:02}:{:02}", self.web_pull_cooldown.num_minutes(), self.web_pull_cooldown.num_seconds() % 60));
-                        } else {
+                        if !self.web_pull_cooldown.is_zero() {
                             self.web_pull_cooldown = self.web_pull_cooldown - Duration::seconds(1);
                         }
                     }

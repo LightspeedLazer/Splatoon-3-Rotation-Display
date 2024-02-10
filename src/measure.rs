@@ -1,9 +1,11 @@
 extern crate chrono;
-use self::chrono::Duration;
-use rainmeter::api::RmApi;
-use crate::{schedule_data::RotationData, rm_write::{write_to_skin, ToRM, SplatinkType, TimeBarOptions, RmObject, ObjectType, MeasureType, PluginType, MeasureOptions}, splatfest_data::SplatfestData, rm_structure::{RmStructure, Download}};
 extern crate serde;
+extern crate reqwest;
+use self::chrono::Duration;
 use self::serde::Deserialize;
+use self::reqwest::blocking::{ClientBuilder, Client};
+use rainmeter::api::RmApi;
+use crate::{github_data::Releases, rm_structure::{Download, RmStructure}, rm_write::{write_to_skin, MeasureOptions, MeasureType, ObjectType, PluginType, RmObject, SplatinkType, TimeBarOptions, ToRM}, schedule_data::RotationData, splatfest_data::SplatfestData};
 
 #[allow(non_snake_case)]
 pub struct Measure {
@@ -15,7 +17,12 @@ pub struct Measure {
     pub SKIN_PATH: String,
     web_pull_cooldown: Duration,
     web_pull_cooldown_set: u32,
+    web_client: Client,
 }
+
+const SCHEDULE_URL: &str = "https://splatoon3.ink/data/schedules.json";
+const SPLATFEST_URL: &str = "https://splatoon3.ink/data/festivals.json";
+const GITHUB_RELEASES_URL: &str = "https://api.github.com/repos/LightspeedLazer/Splatoon-3-Rotation-Display/releases";
 
 const SCHEDULE_JSON_NAME: &str = "Schedules Json.json";
 const JSON_FILE_DIR: &str = "";
@@ -44,6 +51,7 @@ impl Measure {
             SKIN_PATH,
             web_pull_cooldown: Duration::seconds(0),
             web_pull_cooldown_set: 2,
+            web_client: ClientBuilder::new().user_agent("Splatoon-3-Rotation-Display").build().unwrap(),
         }
     }
     pub fn dispose(&self) {}
@@ -119,28 +127,6 @@ impl Measure {
         if let None = self.schedules {
             self.populate_schedules();
         }
-        // if let Some(ref schedules) = self.schedules {
-        //     if SCHEDULE_JSON_SOURCE != JsonSource::Web || chrono::Local::now() > schedules.data.regularSchedules.nodes.first().unwrap().endTime {
-        //         match self.pull_schedules() {
-        //             Ok(s) => {
-        //                 match Self::parse_json::<RotationData>(&s) {
-        //                     Ok(source) => {
-        //                         if let Some(ref mut schedules) = self.schedules {
-        //                             if source != *schedules {
-        //                                 self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Schedules out of date");
-        //                                 *schedules = source;
-        //                                 let _ = self.rewrite_file().map_err(|e| self.rm_api.log(crate::rainmeter::api::LogType::Error, e));
-        //                             }
-        //                         }
-        //                     },
-        //                     Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
-        //                 }
-        //             },
-        //             Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
-        //         }
-                
-        //     }
-        // }
         if let Some(ref schedules) = self.schedules {
             match schedules.data.regularSchedules.nodes.first().ok_or("Local Regular Schedule Has No Elements".to_string())
                 .and_then(|event|{
@@ -210,22 +196,6 @@ impl Measure {
     }
 
     fn populate_schedules(&mut self) {
-        // match self.read_local_schedules().or_else(|e| {
-        //         self.rm_api.log(crate::rainmeter::api::LogType::Error, e);
-        //         if let JsonSource::Web = SCHEDULE_JSON_SOURCE {
-        //             self.pull_schedules()
-        //         } else {
-        //             Err("Set To Read Local Schedule File".to_string())
-        //         }
-        //     })
-        // {
-        //     Ok(s) => {
-        //         self.schedules = Self::parse_json(&s)
-        //             .map_err(|e| self.rm_api.log(crate::rainmeter::api::LogType::Error, e))
-        //             .ok();
-        //     },
-        //     Err(e) => {self.rm_api.log(crate::rainmeter::api::LogType::Error, e);}
-        // }
         self.schedules = self.read_local_schedules()
             .or_else(|e| {
                 self.rm_api.log(crate::rainmeter::api::LogType::Warning, e);
@@ -251,7 +221,7 @@ impl Measure {
         match SCHEDULE_JSON_SOURCE {
             JsonSource::Web => {
                 self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Pulling schedules from web...");
-                reqwest::blocking::get("https://splatoon3.ink/data/schedules.json").map_err(|e| format!("Failed To Fetch Json: {e:?}"))?
+                self.web_client.get(SCHEDULE_URL).send().map_err(|e| format!("Failed To Fetch Json: {e:?}"))?
                     .text().map_err(|e| format!("Failed To Build Text: {e:?}"))
             },
             JsonSource::Storage(name) => {
@@ -265,7 +235,7 @@ impl Measure {
         match SPLATFEST_JSON_SOURCE {
             JsonSource::Web => {
                 self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Pulling splatfests from web...");
-                reqwest::blocking::get("https://splatoon3.ink/data/festivals.json").map_err(|e| format!("Failed To Fetch Json: {e:?}"))?
+                self.web_client.get(SPLATFEST_URL).send().map_err(|e| format!("Failed To Fetch Json: {e:?}"))?
                     .text().map_err(|e| format!("Failed To Build Text: {e:?}"))
             },
             JsonSource::Storage(name) => {
@@ -275,34 +245,13 @@ impl Measure {
         }
     }
 
-    fn rewrite_file(&self) -> Result<(), String> {
-        // if let Some(ref schedules) = self.schedules {
-        //     std::fs::write(
-        //         format!("{}/{SCHEDULE_JSON_NAME}", self.RESOURCE_DIR),
-        //         serde_json::to_string(schedules).map_err(|e| format!("Failed To Serialize: {e:?}"))?).map_err(|e| format!("Failed To Write To File: {e:?}")
-        //     )?;
-        //     let ref splatfests = Self::parse_json::<SplatfestData>(&self.pull_splatfests()?)?;
-        //     self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Formatting data...");
-        //     let structure = RmStructure::generate(schedules, splatfests);
-        //     for ele in structure.download(&self.RESOURCE_DIR) {
-        //         let _ = ele.map_err(|e| self.rm_api.log(crate::rainmeter::api::LogType::Error, e));
-        //     }
-        //     self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Rewriting file...");
-        //     write_to_skin(self.SKIN_PATH.as_str(), {
-        //         let mut ret = Vec::new();
-        //         ret.push(RmObject::new(ObjectType::Measure(
-        //             MeasureType::Plugin(PluginType::Splatink(self.measure_type.clone())),
-        //             MeasureOptions::default()
-        //         )).prefix_name_owned("SplatinkCore"));
-        //         ret.append(&mut structure.to_rm());
-        //         ret
-        //     }).map_err(|e| format!("Failed To Write To File: {e:?}"))?;
-        //     self.rm_api.execute_self("!Refresh");
-        //     Ok(())
-        // } else {
-        //     Err("Failed To Rewrite File: No Schedule".to_string())
-        // }
+    fn pull_releases(&self) -> Result<String, String> {
+        self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Pulling releases from web...");
+        self.web_client.get(GITHUB_RELEASES_URL).send().map_err(|e| format!("Failed To Fetch Json: {e:?}"))?
+            .text().map_err(|e| format!("Failed To Build Text: {e:?}"))
+    }
 
+    fn rewrite_file(&self) -> Result<(), String> {
         self.schedules.as_ref().ok_or("Failed To Rewrite File: No Schedule".to_string())
             .and_then(|schedules|                       // Write internal to Local
                 serde_json::to_string(schedules).map_err(|e| format!("Failed To Serialize: {e:?}"))
@@ -319,11 +268,19 @@ impl Measure {
                     .and_then(|json|
                         Self::parse_json::<SplatfestData>(&json)
                     )
-                    .map(|ref splatfests| {
-                        self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Building Structure...");
-                        RmStructure::generate(schedules, splatfests)
-                    })
-            )
+                    .map(|splatfests| (schedules, splatfests))
+                )
+            .and_then(|(schedules, splatfests)|
+                self.pull_releases()
+                    .and_then(|json|
+                        Self::parse_json::<Releases>(&json)
+                    )
+                    .map(|releases| (schedules, splatfests, releases))
+                )
+            .map(|(schedules, splatfests, releases)| {
+                self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Building Structure...");
+                RmStructure::generate(schedules, &splatfests, &releases)
+            })
             .map(|structure|{                           // Download Images
                 self.rm_api.log(crate::rainmeter::api::LogType::Notice, "Downloading missing images...");
                 for ele in structure.download(&self.RESOURCE_DIR) {

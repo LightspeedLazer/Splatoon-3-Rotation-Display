@@ -9,83 +9,83 @@ use self::chrono::prelude::*;
 
 use super::*;
 
-type Releases = Vec<Release>;
+pub type Releases = Vec<Release>;
 
 #[derive(Deserialize)]
-struct Release {
-    url: String,
-    assets_url: String,
-    upload_url: String,
-    html_url: String,
-    id: u32,
-    author: Author,
-    node_id: String,
-    tag_name: String,
-    target_commitish: String,
-    name: String,
-    draft: bool,
-    prerelease: bool,
-    created_at: DateTime<Local>,
-    published_at: DateTime<Local>,
-    assets: Vec<Asset>,
-    tarball_url: String,
-    zipball_url: String,
-    body: String,
-    reactions: Reactions
+pub struct Release {
+    pub url: String,
+    pub assets_url: String,
+    pub upload_url: String,
+    pub html_url: String,
+    pub id: u32,
+    pub author: Author,
+    pub node_id: String,
+    pub tag_name: String,
+    pub target_commitish: String,
+    pub name: String,
+    pub draft: bool,
+    pub prerelease: bool,
+    pub created_at: DateTime<Local>,
+    pub published_at: DateTime<Local>,
+    pub assets: Vec<Asset>,
+    pub tarball_url: String,
+    pub zipball_url: String,
+    pub body: String,
+    pub reactions: Option<Reactions>
 }
 
 #[derive(Deserialize)]
-struct Author {
-    login: String,
-    id: u32,
-    node_id: String,
-    avatar_url: String,
-    gravatar_id: String,
-    url: String,
-    html_url: String,
-    followers_url: String,
-    following_url: String,
-    gists_url: String,
-    starred_url: String,
-    subscriptions_url: String,
-    organizations_url: String,
-    repos_url: String,
-    events_url: String,
-    received_events_url: String,
+pub struct Author {
+    pub login: String,
+    pub id: u32,
+    pub node_id: String,
+    pub avatar_url: String,
+    pub gravatar_id: String,
+    pub url: String,
+    pub html_url: String,
+    pub followers_url: String,
+    pub following_url: String,
+    pub gists_url: String,
+    pub starred_url: String,
+    pub subscriptions_url: String,
+    pub organizations_url: String,
+    pub repos_url: String,
+    pub events_url: String,
+    pub received_events_url: String,
     #[serde(rename = "type")]
-    type_: String,
-    site_admin: bool,
+    pub type_: String,
+    pub site_admin: bool,
 }
 
 #[derive(Deserialize)]
-struct Asset {
-    url: String,
-    id: u32,
-    node_id: String,
-    name: String,
-    label: String,
-    uploader: Author,
-    content_type: String,
-    state: String,
-    size: u32,
-    download_count: u32,
-    created_at: DateTime<Local>,
-    published_at: DateTime<Local>,
-    browser_download_url: String,
+pub struct Asset {
+    pub url: String,
+    pub id: u32,
+    pub node_id: String,
+    pub name: String,
+    pub label: Option<String>,
+    pub uploader: Author,
+    pub content_type: String,
+    pub state: String,
+    pub size: u32,
+    pub download_count: u32,
+    pub created_at: DateTime<Local>,
+    pub updated_at: DateTime<Local>,
+    pub browser_download_url: String,
 }
 
 #[derive(Deserialize)]
-struct Reactions {
-    url: String,
-    total_count: u32,
+pub struct Reactions {
+    pub url: String,
+    pub total_count: u32,
     #[serde(rename = "+1")]
-    pos_one: u32,
+    pub pos_one: u32,
     #[serde(rename = "-1")]
-    neg_one: u32,
-    laugh: u32,
-    hooray: u32,
-    confused: u32,
-    heart: u32,
-    rocket: u32,
-    eyes: u32,
+    pub neg_one: u32,
+    pub laugh: u32,
+    pub hooray: u32,
+    pub confused: u32,
+    pub heart: u32,
+    pub rocket: u32,
+    pub eyes: u32,
 }

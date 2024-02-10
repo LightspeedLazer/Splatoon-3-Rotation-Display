@@ -120,9 +120,10 @@ impl ToRM for (DateTime<Local>, DateTime<Local>) {
 pub struct RmStructure {
     pub schedules: Vec<Box<dyn Sche>>,
     pub splatfest: Option<Splatfest>,
+    pub update_notif: Option<UpdateNotification>,
 }
 impl RmStructure {
-    pub fn generate(schedule_data: &crate::schedule_data::RotationData, splatfest_data: &crate::splatfest_data::SplatfestData) -> Self {
+    pub fn generate(schedule_data: &crate::schedule_data::RotationData, splatfest_data: &crate::splatfest_data::SplatfestData, releases: &crate::github_data::Releases) -> Self {
         let mut active_schedules: Vec<Box<dyn Sche>> = Vec::new();
         let mut active_ids = Vec::new();
         //-----------------------------Regular Schedule-----------------------------
@@ -662,16 +663,24 @@ impl RmStructure {
                 },
                 None => None,
         };
+
+        let old_version = format!("v{}", env!("CARGO_PKG_VERSION"));
+        let update_notif = releases.iter().filter(|rel| !rel.prerelease).next().and_then(|rel| old_version.ne(&rel.tag_name).then_some(rel)).map(|rel| UpdateNotification{
+            new_version: rel.tag_name.clone(),
+            old_version,
+            release_url: rel.html_url.clone()
+        });
+
         RmStructure{
             schedules: active_schedules,
-            splatfest: splatfest
+            splatfest,
+            update_notif,
         }
     }
 }
 impl ToRM for RmStructure {
     fn to_rm(&self) -> Vec<RmObject> {
-        let mut ret = Vec::new();
-        let mut schedules = {
+        let mut ret = {
             let mut ret = Vec::new();
             for ele in self.schedules.iter() {
                 ret.append(&mut ele.to_rm());
@@ -679,25 +688,26 @@ impl ToRM for RmStructure {
             ret
         };
         if let Some(splatfest) = &self.splatfest {
-            match splatfest.state {
-                SplatfestState::MissingTricolor | SplatfestState::Active(_, _) => {
-                    for obj in schedules.iter_mut() {
-                        if let ObjectType::Meter(_, ref mut o) = obj.object_type {
-                            o.pos += (0,150).into();
+            for obj in ret.iter_mut() {
+                if let ObjectType::Meter(_, ref mut o) = obj.object_type {
+                    o.pos += (0,
+                        match splatfest.state {
+                            SplatfestState::MissingTricolor | SplatfestState::Active(_, _) => 150,
+                            SplatfestState::Finished(_) => 400,
                         }
-                    }
-                },
-                SplatfestState::Finished(_) => {
-                    for obj in schedules.iter_mut() {
-                        if let ObjectType::Meter(_, ref mut o) = obj.object_type {
-                            o.pos += (0,400).into();
-                        }
-                    }
-                },
+                    ).into();
+                }
             }
             ret.append(&mut splatfest.to_rm());
         }
-        ret.append(&mut schedules);
+        if let Some(notif) = &self.update_notif {
+            for obj in ret.iter_mut() {
+                if let ObjectType::Meter(_, ref mut o) = obj.object_type {
+                    o.pos += (0,50).into();
+                }
+            }
+            ret.append(&mut notif.to_rm());
+        }
         ret
     }
 }
@@ -1716,6 +1726,40 @@ impl ToRM for SplatfestTeamResult {
                     }
                 )
             ).prefix_name_owned("Tricolor")
+        );
+        ret
+    }
+}
+
+#[derive(Clone)]
+pub struct UpdateNotification {
+    pub new_version: String,
+    pub old_version: String,
+    pub release_url: String,
+}
+impl ToRM for UpdateNotification {
+    fn to_rm(&self) -> Vec<RmObject> {
+        let mut ret = Vec::new();
+        ret.push(
+            RmObject::new(
+                ObjectType::Meter(
+                    MeterType::String(
+                        {
+                            let mut ret = StringOptions::default();
+                            ret.text = format!("{} is now available (current version: {})", self.new_version, self.old_version);
+                            ret
+                        }
+                    ),
+                    {
+                        let mut ret = MeterOptions::new();
+                        ret.pos = (225,25).into();
+                        ret.size = (250,50).into();
+                        ret.solid_color = Some((150,150,30,255).into());
+                        ret.left_click_action.push(self.release_url.clone());
+                        ret
+                    }
+                )
+            ).prefix_name_owned("UpdateNotification")
         );
         ret
     }

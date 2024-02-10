@@ -1,5 +1,5 @@
 extern crate chrono;
-use std::ops::{Mul, Div};
+use std::ops::{Div, Mul, Not};
 
 use crate::rm_write::{Color, ToRM, RmObject, ObjectType, MeterType, StringOptions, MeterOptions, ImageOptions, MeasureType, PluginType, SplatinkType, TimeBarOptions, MeasureOptions, BarOptions, BarOrientation, ToolTip};
 
@@ -754,7 +754,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (0,0).into();
+                        ret.pos = (0+50,0).into();
                         ret.size = (50,50).into();
                         ret.solid_color = Some((50,50,50,255).into());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.prev_sche));
@@ -775,7 +775,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (75,25).into();
+                        ret.pos = (75+50,25).into();
                         ret.size = (50,50).into();
                         ret.solid_color = Some((50,50,50,255).into());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.prev_sche));
@@ -795,7 +795,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (100,0).into();
+                        ret.pos = (100+50,0).into();
                         ret.size = (50,50).into();
                         ret.solid_color = Some((40,40,40,255).into());
                         ret
@@ -815,7 +815,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (200,25).into();
+                        ret.pos = (200+50,25).into();
                         ret.size = (100,50).into();
                         ret.solid_color = Some((40,40,40,255).into());
                         ret
@@ -835,7 +835,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (275,25).into();
+                        ret.pos = (275+50,25).into();
                         ret.size = (50,50).into();
                         ret.solid_color = Some((50,50,50,255).into());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.next_sche));
@@ -855,7 +855,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     ),
                     {
                         let mut ret = MeterOptions::new();
-                        ret.pos = (300,0).into();
+                        ret.pos = (300+50,0).into();
                         ret.size = (50,50).into();
                         ret.solid_color = Some((50,50,50,255).into());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.next_sche));
@@ -879,7 +879,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                                 MeterType::String(s) if s.string_align == Some(crate::rm_write::StringAlign::CenterCenter) => vert_size.max(o.pos.y + o.size.y / 2),
                                 _ => vert_size.max(o.pos.y + o.size.y),
                             };
-                            o.pos += (0, vert_size_accum).into();
+                            o.pos += (((self.id.contains("Chal") || self.id.contains("Coop")).not().then_some(50).unwrap_or_default()), vert_size_accum).into();
                         }
                     }
                     ret
@@ -1548,6 +1548,9 @@ impl ToRM for Splatfest {
 
         for ele in ret.iter_mut() {
             ele.prefix_name_mut("Splatfest");
+            if let ObjectType::Meter(_, ref mut o) = ele.object_type {
+                o.pos += (25,0).into();
+            }
         }
         ret
     }

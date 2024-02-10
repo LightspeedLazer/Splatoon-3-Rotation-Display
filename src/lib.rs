@@ -4,6 +4,7 @@ mod rm_structure;
 mod rm_write;
 mod measure;
 mod rainmeter;
+mod github_data;
 
 use measure::Measure;
 use rainmeter::api::RmApi;

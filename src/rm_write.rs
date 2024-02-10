@@ -5,7 +5,7 @@ use self::serde::{Deserialize, Serialize};
 #[allow(unused)]
 pub fn write_to_skin(skin_path: &str, contents: Vec<RmObject>) -> Result<(), std::io::Error>{
     std::fs::write(skin_path, {
-        let mut ret = format!("[Rainmeter]\nUpdate=1000\nAccurateText=1\nContextTitle=Refresh File\nContextAction=[!CommandMeasure \"SplatinkCore\" \"RefreshFile\"]\nContextTitle2=Repull Data\nContextAction2=[!CommandMeasure \"SplatinkCore\" \"RepullData\"]\n[Metadata]\nName=Splatoon 3 Rotation Display\nAuthor=gamingtime\nInformation=Uses splatoon3.ink to display the future Splatoon 3 schedules along with upcoming and recent Splatfest data\nVersion={}\nLicense=Creative Commons Attribution - Non - Commercial - Share Alike 3.0\n", env!("CARGO_PKG_VERSION"));
+        let mut ret = format!("[Rainmeter]\nUpdate=1000\nAccurateText=1\nContextTitle=Refresh File\nContextAction=[!CommandMeasure \"SplatinkCore\" \"RefreshFile\"]\nContextTitle2=Repull Data\nContextAction2=[!CommandMeasure \"SplatinkCore\" \"RepullData\"]\n@include=#@#Styles.inc\n[Metadata]\nName=Splatoon 3 Rotation Display\nAuthor=gamingtime\nInformation=Uses splatoon3.ink to display the future Splatoon 3 schedules along with upcoming and recent Splatfest data\nVersion={}\nLicense=Creative Commons Attribution - Non - Commercial - Share Alike 3.0\n", env!("CARGO_PKG_VERSION"));
         for obj in contents {
             ret += &format!("{obj}\n");
         }
@@ -191,6 +191,7 @@ impl Display for TimeBarOptions {
 pub struct MeterOptions {
     pub pos: Coord,
     pub size: Coord,
+    pub style: Option<String>,
     pub solid_color: Option<Color>,
     pub measure_name: Option<String>,
     pub groups: Vec<String>,
@@ -204,6 +205,9 @@ pub struct MeterOptions {
 impl Display for MeterOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut ret = format!("X={}\nY={}\nW={}\nH={}", self.pos.x, self.pos.y, self.size.x, self.size.y);
+        if let Some(s) = &self.style {
+            ret += &format!("\nMeterStyle={s}");
+        }
         if let Some(c) = &self.solid_color {
             ret += &format!("\nSolidColor={c}");
         }
@@ -256,6 +260,7 @@ impl MeterOptions {
         MeterOptions {
             pos: (0,0).into(),
             size: (0,0).into(),
+            style: None,
             solid_color: None,
             measure_name: None,
             groups: Vec::new(),

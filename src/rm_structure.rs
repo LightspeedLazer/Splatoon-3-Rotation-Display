@@ -72,7 +72,7 @@ fn new_timebar(start_time: &DateTime<Local>, end_time: &DateTime<Local>) -> Vec<
             let mut ret = MeterOptions::new();
             ret.size = (100,50).into();
             ret.measure_name = Some("Measure".to_string());
-            ret.solid_color = Some((50,50,50,255).into());
+            ret.style = Some("TimeBarStyle".to_string());
             ret
         }
     )).prefix_name_owned("TimeBar"));
@@ -1181,7 +1181,7 @@ impl ToRM for SalmonRunEvent {
                         let mut ret = MeterOptions::new();
                         ret.pos = (400, 0).into();
                         ret.size = (50, 50).into();
-                        ret.solid_color = Some((75,50,50,255).into());
+                        ret.style = Some("SalmonRunKingSalmonidStyle".to_string());
                         ret.tool_tip = Some(ToolTip::new(self.king_guess.clone()));
                         ret
                     }
@@ -1221,7 +1221,7 @@ impl ToRM for SalmonRunSetting {
                 if let ObjectType::Meter(_, ref mut o) = obj.object_type {
                     o.pos += (100 + 50 * i as isize, 0).into();
                     if self.special {
-                        o.solid_color = Some((150,150,30,255).into());
+                        o.style = Some("SalmonRunSpecialWeaponStyle".to_string());
                     }
                 }
                 ret.push(obj);
@@ -1255,7 +1255,7 @@ impl Weapon {
                 {
                     let mut ret = MeterOptions::new();
                     ret.size = (50,50).into();
-                    ret.solid_color = Some((30,30,30,255).into());
+                    ret.style = Some("SalmonRunNormalWeaponStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.name.clone()));
                     ret
                 }

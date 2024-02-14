@@ -292,15 +292,15 @@ impl ToolTip {
 
 pub enum MeterType {
     Image(ImageOptions),
-    String(StringOptions),
-    Bar(BarOptions),
+    String(String),
+    Bar,
 }
 impl Display for MeterType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MeterType::Image(o) => write!(f, "Image\n{o}"),
-            MeterType::String(o) => write!(f, "String\n{o}"),
-            MeterType::Bar(o) => write!(f, "Bar\n{o}"),
+            MeterType::String(o) => write!(f, "String\nText={o}\nStringAlign=CenterCenter"),
+            MeterType::Bar => write!(f, "Bar"),
         }
     }
 }
@@ -316,92 +316,5 @@ impl Display for ImageOptions {
             ret.push_str(&format!("\nPreserveAspectRatio=1"))
         }
         write!(f, "{ret}")
-    }
-}
-
-pub struct StringOptions {
-    pub text: String,
-    pub string_align: Option<StringAlign>,
-    pub font_color: Option<Color>,
-    pub font_size: Option<f64>,
-    pub font_weight: Option<usize>,
-    pub clip_string: Option<usize>,
-    pub clip_string_w: Option<usize>,
-    pub anti_alias: bool,
-}
-impl Display for StringOptions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut ret = format!("Text={}", self.text);
-        if let Some(x) = &self.string_align {
-            ret += &format!("\nStringAlign={x}");
-        }
-        if let Some(x) = &self.font_color {
-            ret += &format!("\nFontColor={x}");
-        }
-        if let Some(x) = &self.font_size {
-            ret += &format!("\nFontSize={x}");
-        }
-        if let Some(x) = &self.font_weight {
-            ret += &format!("\nFontWeight={x}");
-        }
-        if let Some(x) = &self.clip_string {
-            ret += &format!("\nClipString={x}");
-        }
-        if let Some(x) = &self.clip_string_w {
-            ret += &format!("\nClipStringW={x}");
-        }
-        if self.anti_alias {
-            ret += &format!("\nAntiAlias=1");
-        }
-        write!(f, "{ret}")
-    }
-}
-impl Default for StringOptions {
-    fn default() -> Self {
-        StringOptions {
-            text: String::new(),
-            string_align: Some(StringAlign::CenterCenter),
-            font_color: Some((255,255,255,255).into()),
-            font_size: Some(12_f64),
-            font_weight: Some(800),
-            clip_string: Some(2),
-            clip_string_w: None,
-            anti_alias: true,
-        }
-    }
-}
-
-#[derive(PartialEq)]
-pub enum StringAlign {
-    CenterCenter,
-}
-impl Display for StringAlign {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            StringAlign::CenterCenter => write!(f, "CenterCenter"),
-        }
-    }
-}
-
-pub struct BarOptions {
-    pub bar_color: Color,
-    pub bar_orientation: BarOrientation,
-}
-impl Display for BarOptions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "BarColor={}\nBarOrientation={}", self.bar_color, self.bar_orientation)
-    }
-}
-#[allow(unused)]
-pub enum BarOrientation {
-    Vertical,
-    Horizontal,
-}
-impl Display for BarOrientation {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            BarOrientation::Vertical => write!(f, "Vertical"),
-            BarOrientation::Horizontal => write!(f, "Horizontal"),
-        }
     }
 }

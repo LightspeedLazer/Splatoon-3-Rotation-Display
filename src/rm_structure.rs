@@ -1,7 +1,7 @@
 extern crate chrono;
 use std::ops::{Div, Mul, Not};
 
-use crate::rm_write::{Color, ToRM, RmObject, ObjectType, MeterType, StringOptions, MeterOptions, ImageOptions, MeasureType, PluginType, SplatinkType, TimeBarOptions, MeasureOptions, BarOptions, BarOrientation, ToolTip};
+use crate::rm_write::{Color, ToRM, RmObject, ObjectType, MeterType, MeterOptions, ImageOptions, MeasureType, PluginType, SplatinkType, TimeBarOptions, MeasureOptions, ToolTip};
 
 const DISPLAY_TIME_FORMAT: &str = "%a %-I%P";
 const TOOLTIP_TIME_FORMAT: &str = "%-m/%-d %-I%P";
@@ -62,48 +62,37 @@ fn new_timebar(start_time: &DateTime<Local>, end_time: &DateTime<Local>) -> Vec<
         MeasureOptions::default()
     )).prefix_name_owned("TimeBarMeasure"));
     ret.push(RmObject::new(ObjectType::Meter(
-        MeterType::Bar(
-            BarOptions {
-                bar_color: (150,50,50,255).into(),
-                bar_orientation: BarOrientation::Horizontal
-            }
-        ),
+        MeterType::Bar,
         {
             let mut ret = MeterOptions::new();
             ret.size = (100,50).into();
             ret.measure_name = Some("Measure".to_string());
-            ret.solid_color = Some((50,50,50,255).into());
+            ret.style = Some("TimeBarStyle".to_string());
             ret
         }
     )).prefix_name_owned("TimeBar"));
     ret.push(RmObject::new(ObjectType::Meter(
         MeterType::String(
-            {
-                let mut ret = StringOptions::default();
-                ret.text = start_time.format(DISPLAY_TIME_FORMAT).to_string();
-                ret
-            }
+            start_time.format(DISPLAY_TIME_FORMAT).to_string()
         ),
         {
             let mut ret = MeterOptions::new();
             ret.pos = (25,25).into();
             ret.size = (50,50).into();
+            ret.style = Some("TimeTextStyle".to_string());
             ret.tool_tip = Some(ToolTip::new(start_time.format(TOOLTIP_TIME_FORMAT).to_string()));
             ret
         }
     )).prefix_name_owned("StartTime"));
     ret.push(RmObject::new(ObjectType::Meter(
         MeterType::String(
-            {
-                let mut ret = StringOptions::default();
-                ret.text = end_time.format(DISPLAY_TIME_FORMAT).to_string();
-                ret
-            }
+            end_time.format(DISPLAY_TIME_FORMAT).to_string()
         ),
         {
             let mut ret = MeterOptions::new();
             ret.pos = (75,25).into();
             ret.size = (50,50).into();
+            ret.style = Some("TimeTextStyle".to_string());
             ret.tool_tip = Some(ToolTip::new(end_time.format(TOOLTIP_TIME_FORMAT).to_string()));
             ret
         }
@@ -766,7 +755,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                         let mut ret = MeterOptions::new();
                         ret.pos = (0+50,0).into();
                         ret.size = (50,50).into();
-                        ret.solid_color = Some((50,50,50,255).into());
+                        ret.style = Some("SelectorImageStyle".to_string());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.prev_sche));
                         ret
                     }
@@ -777,17 +766,13 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = "<<".to_string();
-                            ret
-                        }
+                        "<<".to_string()
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (75+50,25).into();
                         ret.size = (50,50).into();
-                        ret.solid_color = Some((50,50,50,255).into());
+                        ret.style = Some("SelectorArrowStyle".to_string());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.prev_sche));
                         ret
                     }
@@ -807,7 +792,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                         let mut ret = MeterOptions::new();
                         ret.pos = (100+50,0).into();
                         ret.size = (50,50).into();
-                        ret.solid_color = Some((40,40,40,255).into());
+                        ret.style = Some("CurrentScheduleImageStyle".to_string());
                         ret
                     }
                 )
@@ -817,17 +802,13 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = self.title.clone();
-                            ret
-                        }
+                        self.title.clone()
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (200+50,25).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((40,40,40,255).into());
+                        ret.style = Some("CurrentScheduleTitleStyle".to_string());
                         ret
                     }
                 )
@@ -837,17 +818,13 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = ">>".to_string();
-                            ret
-                        }
+                        ">>".to_string()
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (275+50,25).into();
                         ret.size = (50,50).into();
-                        ret.solid_color = Some((50,50,50,255).into());
+                        ret.style = Some("SelectorArrowStyle".to_string());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.next_sche));
                         ret
                     }
@@ -867,7 +844,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                         let mut ret = MeterOptions::new();
                         ret.pos = (300+50,0).into();
                         ret.size = (50,50).into();
-                        ret.solid_color = Some((50,50,50,255).into());
+                        ret.style = Some("SelectorImageStyle".to_string());
                         ret.left_click_action.push(format!("!CommandMeasure SplatinkCore \"redrawsche {}\"", self.next_sche));
                         ret
                     }
@@ -886,7 +863,7 @@ impl <T: ToRM + Download> ToRM for Schedule<T> {
                     for obj in ret.iter_mut() {
                         if let ObjectType::Meter(ref t, ref mut o) = obj.prefix_name_mut(&format!("{i}")).object_type {
                             vert_size = match t {
-                                MeterType::String(s) if s.string_align == Some(crate::rm_write::StringAlign::CenterCenter) => vert_size.max(o.pos.y + o.size.y / 2),
+                                MeterType::String(_) => vert_size.max(o.pos.y + o.size.y / 2),
                                 _ => vert_size.max(o.pos.y + o.size.y),
                             };
                             o.pos += (((self.id.contains("Chal") || self.id.contains("Coop")).not().then_some(50).unwrap_or_default()), vert_size_accum).into();
@@ -1003,7 +980,7 @@ impl VsRule {
                 {
                     let mut ret = MeterOptions::new();
                     ret.size = (50,50).into();
-                    ret.solid_color = Some((40,40,40,255).into());
+                    ret.style = Some("ModeStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.name.clone()));
                     ret
                 }
@@ -1029,7 +1006,7 @@ impl Stage {
                 {
                     let mut ret = MeterOptions::new();
                     ret.size = (100,50).into();
-                    ret.solid_color = Some((30,30,30,255).into());
+                    ret.style = Some("StageStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.name.clone()));
                     ret
                 }
@@ -1096,17 +1073,13 @@ impl ToRM for ChalEvent {
         ret.push({
             RmObject::new(ObjectType::Meter(
                 MeterType::String(
-                    {
-                        let mut ret = StringOptions::default();
-                        ret.text = self.title.clone();
-                        ret
-                    }
+                    self.title.clone()
                 ),
                 {
                     let mut ret = MeterOptions::new();
                     ret.pos = (325,75).into();
                     ret.size = (250,50).into();
-                    ret.solid_color = Some((40,40,40,255).into());
+                    ret.style = Some("ChallengeTitleStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.details.clone()));
                     ret
                 }
@@ -1115,19 +1088,13 @@ impl ToRM for ChalEvent {
         ret.push({
             RmObject::new(ObjectType::Meter(
                 MeterType::String(
-                    {
-                        let mut ret = StringOptions::default();
-                        ret.text = self.desc.clone();
-                        ret.font_size = Some(10_f64);
-                        ret.font_weight = Some(400);
-                        ret
-                    }
+                    self.desc.clone()
                 ),
                 {
                     let mut ret = MeterOptions::new();
                     ret.pos = (325,125).into();
                     ret.size = (250,50).into();
-                    ret.solid_color = Some((40,40,40,255).into());
+                    ret.style = Some("ChallengeDescriptionStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.details.clone()));
                     ret
                 }
@@ -1181,7 +1148,7 @@ impl ToRM for SalmonRunEvent {
                         let mut ret = MeterOptions::new();
                         ret.pos = (400, 0).into();
                         ret.size = (50, 50).into();
-                        ret.solid_color = Some((75,50,50,255).into());
+                        ret.style = Some("SalmonRunKingSalmonidStyle".to_string());
                         ret.tool_tip = Some(ToolTip::new(self.king_guess.clone()));
                         ret
                     }
@@ -1221,7 +1188,7 @@ impl ToRM for SalmonRunSetting {
                 if let ObjectType::Meter(_, ref mut o) = obj.object_type {
                     o.pos += (100 + 50 * i as isize, 0).into();
                     if self.special {
-                        o.solid_color = Some((150,150,30,255).into());
+                        o.style = Some("SalmonRunSpecialRotationWeaponStyle".to_string());
                     }
                 }
                 ret.push(obj);
@@ -1255,7 +1222,7 @@ impl Weapon {
                 {
                     let mut ret = MeterOptions::new();
                     ret.size = (50,50).into();
-                    ret.solid_color = Some((30,30,30,255).into());
+                    ret.style = Some("SalmonRunNormalRotationWeaponStyle".to_string());
                     ret.tool_tip = Some(ToolTip::new(self.name.clone()));
                     ret
                 }
@@ -1282,17 +1249,13 @@ impl ToRM for Splatfest {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = self.title.clone();
-                            ret
-                        }
+                        self.title.clone()
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (250, 25).into();
                         ret.size = (300, 50).into();
-                        ret.solid_color = Some((50, 50, 50, 255).into());
+                        ret.style = Some("SplatfestTitleStyle".to_string());
                         ret
                     }
                 )
@@ -1322,17 +1285,14 @@ impl ToRM for Splatfest {
                 RmObject::new(
                     ObjectType::Meter(
                         MeterType::String(
-                            {
-                                let mut ret = StringOptions::default();
-                                ret.text = team.name.clone();
-                                ret
-                            }
+                            team.name.clone()
                         ),
                         {
                             let mut ret = MeterOptions::new();
                             ret.pos = (150 + i as isize * 100, 125).into();
                             ret.size = (100, 50).into();
                             ret.solid_color = Some(team.color.clone());
+                            ret.style = Some("SplatfestTeamNameStyle".to_string());
                             ret
                         }
                     )
@@ -1353,7 +1313,7 @@ impl ToRM for Splatfest {
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.size = (100,150).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestBackgroundStyle".to_string());
                                 ret
                             }
                         )
@@ -1405,17 +1365,14 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = results.winner.name.clone();
-                                    ret
-                                }
+                                results.winner.name.clone()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50,25).into();
                                 ret.size = (100,50).into();
                                 ret.solid_color = Some(results.winner.color.clone());
+                                ret.style = Some("SplatfestWinnerTeamNameStyle".to_string());
                                 ret
                             }
                         )
@@ -1444,17 +1401,13 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = "Sneak Peak".to_string();
-                                    ret
-                                }
+                                "Sneak Peak".to_string()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50, 175).into();
                                 ret.size = (100, 50).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestResultsCategoryTitleStyle".to_string());
                                 ret
                             }
                         )
@@ -1464,17 +1417,13 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = "Votes".to_string();
-                                    ret
-                                }
+                                "Votes".to_string()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50, 225).into();
                                 ret.size = (100, 50).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestResultsCategoryTitleStyle".to_string());
                                 ret
                             }
                         )
@@ -1484,17 +1433,13 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = "Open".to_string();
-                                    ret
-                                }
+                                "Open".to_string()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50, 275).into();
                                 ret.size = (100, 50).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestResultsCategoryTitleStyle".to_string());
                                 ret
                             }
                         )
@@ -1504,17 +1449,13 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = "Pro".to_string();
-                                    ret
-                                }
+                                "Pro".to_string()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50, 325).into();
                                 ret.size = (100, 50).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestResultsCategoryTitleStyle".to_string());
                                 ret
                             }
                         )
@@ -1524,17 +1465,13 @@ impl ToRM for Splatfest {
                     RmObject::new(
                         ObjectType::Meter(
                             MeterType::String(
-                                {
-                                    let mut ret = StringOptions::default();
-                                    ret.text = "Tricolor".to_string();
-                                    ret
-                                }
+                                "Tricolor".to_string()
                             ),
                             {
                                 let mut ret = MeterOptions::new();
                                 ret.pos = (50, 375).into();
                                 ret.size = (100, 50).into();
-                                ret.solid_color = Some((50,50,50,255).into());
+                                ret.style = Some("SplatfestResultsCategoryTitleStyle".to_string());
                                 ret
                             }
                         )
@@ -1616,20 +1553,13 @@ impl ToRM for SplatfestTeamResult {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{}%", self.sneak_peak.1.mul(10000.0).round().div(100.0));
-                            if self.sneak_peak.0 {
-                                ret.font_color = Some((150,150,50,255).into());
-                            }
-                            ret
-                        }
+                        format!("{}%", self.sneak_peak.1.mul(10000.0).round().div(100.0))
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (50,25).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((30,30,30,255).into());
+                        ret.style = Some(self.sneak_peak.0.then_some("SplatfestResultsCategoryWinnerStyle".to_string()).unwrap_or("SplatfestResultsCategoryLoserStyle".to_string()));
                         ret
                     }
                 )
@@ -1639,20 +1569,13 @@ impl ToRM for SplatfestTeamResult {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{}%", self.votes.1.mul(10000.0).round().div(100.0));
-                            if self.votes.0 {
-                                ret.font_color = Some((150,150,50,255).into());
-                            }
-                            ret
-                        }
+                        format!("{}%", self.votes.1.mul(10000.0).round().div(100.0))
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (50,75).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((30,30,30,255).into());
+                        ret.style = Some(self.votes.0.then_some("SplatfestResultsCategoryWinnerStyle".to_string()).unwrap_or("SplatfestResultsCategoryLoserStyle".to_string()));
                         ret
                     }
                 )
@@ -1662,20 +1585,13 @@ impl ToRM for SplatfestTeamResult {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{}%", self.open.1.mul(10000.0).round().div(100.0));
-                            if self.open.0 {
-                                ret.font_color = Some((150,150,50,255).into());
-                            }
-                            ret
-                        }
+                        format!("{}%", self.open.1.mul(10000.0).round().div(100.0))
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (50,125).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((30,30,30,255).into());
+                        ret.style = Some(self.open.0.then_some("SplatfestResultsCategoryWinnerStyle".to_string()).unwrap_or("SplatfestResultsCategoryLoserStyle".to_string()));
                         ret
                     }
                 )
@@ -1685,20 +1601,13 @@ impl ToRM for SplatfestTeamResult {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{}%", self.pro.1.mul(10000.0).round().div(100.0));
-                            if self.pro.0 {
-                                ret.font_color = Some((150,150,50,255).into());
-                            }
-                            ret
-                        }
+                        format!("{}%", self.pro.1.mul(10000.0).round().div(100.0))
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (50,175).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((30,30,30,255).into());
+                        ret.style = Some(self.pro.0.then_some("SplatfestResultsCategoryWinnerStyle".to_string()).unwrap_or("SplatfestResultsCategoryLoserStyle".to_string()));
                         ret
                     }
                 )
@@ -1708,20 +1617,13 @@ impl ToRM for SplatfestTeamResult {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{}%", self.tricolor.1.mul(10000.0).round().div(100.0));
-                            if self.tricolor.0 {
-                                ret.font_color = Some((150,150,50,255).into());
-                            }
-                            ret
-                        }
+                        format!("{}%", self.tricolor.1.mul(10000.0).round().div(100.0))
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (50,225).into();
                         ret.size = (100,50).into();
-                        ret.solid_color = Some((30,30,30,255).into());
+                        ret.style = Some(self.tricolor.0.then_some("SplatfestResultsCategoryWinnerStyle".to_string()).unwrap_or("SplatfestResultsCategoryLoserStyle".to_string()));
                         ret
                     }
                 )
@@ -1744,17 +1646,13 @@ impl ToRM for UpdateNotification {
             RmObject::new(
                 ObjectType::Meter(
                     MeterType::String(
-                        {
-                            let mut ret = StringOptions::default();
-                            ret.text = format!("{} is now available (current version: {})", self.new_version, self.old_version);
-                            ret
-                        }
+                        format!("{} is now available (current version: {})", self.new_version, self.old_version)
                     ),
                     {
                         let mut ret = MeterOptions::new();
                         ret.pos = (225,25).into();
                         ret.size = (250,50).into();
-                        ret.solid_color = Some((150,150,30,255).into());
+                        ret.style = Some("UpdateNotificationStyle".to_string());
                         ret.left_click_action.push(self.release_url.clone());
                         ret
                     }
